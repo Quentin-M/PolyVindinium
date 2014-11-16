@@ -2,14 +2,11 @@ package vindinium.game.core;
 
 import java.util.HashMap;
 
-import vindinium.game.IBoard;
-import vindinium.game.Tile;
-
 /**
  * A simple implementation of a Vindinium board to help
  * query and interact with the game board.
  */
-public class Board implements IBoard {
+public class Board {
 	private static final HashMap<String, Tile> TILE_MAP = new HashMap<String, Tile>();
 	private int mSize = 1;
 	private String mTiles = null;
@@ -31,6 +28,17 @@ public class Board implements IBoard {
 
 	public Board() { }
 	
+	/**
+	 * Copy construct
+	 * @param board the board to copy
+	 */
+	public Board(Board board) {
+		if(board == null) throw new IllegalArgumentException("Parameter can't be null");
+		
+		mSize = board.mSize;
+		mTiles = new String(board.mTiles);
+	}
+
 	/**
 	 * Get the size of the board (all boards are square)
 	 */

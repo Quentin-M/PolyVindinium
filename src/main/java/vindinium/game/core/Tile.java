@@ -1,9 +1,7 @@
-package vindinium.game;
+package vindinium.game.core;
 
 /**
  * Enum for Vindinium board tiles.
- * 
- * TODO: Not have distinct enums for each player
  */
 public enum Tile {
 	AIR,

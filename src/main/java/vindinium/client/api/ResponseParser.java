@@ -3,8 +3,6 @@ package vindinium.client.api;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import vindinium.game.IBoard;
-import vindinium.game.IHero;
 import vindinium.game.core.Board;
 import vindinium.game.core.Game;
 import vindinium.game.core.Hero;
@@ -23,7 +21,7 @@ public class ResponseParser {
 	 */
 	public Response parseResponseJson(JSONObject response) {
 		Game parsedGame = new Game();
-		IHero parsedHero = null;
+		Hero parsedHero = null;
 		
 		// Parse first level attributes
 		JSONObject gameObject = response.getJSONObject(JSON.GAME);
@@ -41,7 +39,7 @@ public class ResponseParser {
 		
 		// Parse heroes array
 		JSONArray heroesArray = gameObject.getJSONArray(JSON.Game.HEROES);
-		IHero[] heroes = new IHero[heroesArray.length()];
+		Hero[] heroes = new Hero[heroesArray.length()];
 		for( int i = 0; i < heroesArray.length(); ++i ) {
 			JSONObject currentHeroObject = heroesArray.getJSONObject(i);
 			heroes[i] = parseHero(currentHeroObject);
@@ -66,9 +64,9 @@ public class ResponseParser {
 	 * Parse a Hero JSONObject into a Java Hero POJO.
 	 * 
 	 * @param heroObject A JSONObject in the hero data schema expected from a Vindinium server
-	 * @return A IHero object POJO representing the json object
+	 * @return A Hero object POJO representing the json object
 	 */
-	public IHero parseHero(JSONObject heroObject) {
+	public Hero parseHero(JSONObject heroObject) {
 		Hero parsedHero = new Hero();
 		
 		parsedHero.setId( heroObject.getInt(JSON.Hero.ID) );
@@ -99,7 +97,7 @@ public class ResponseParser {
 	 * @param boardObject A JSONObject in the board data schema expected from a Vindinium server
 	 * @return A IBoard object POJO representing the json object
 	 */
-	public IBoard parseBoard(JSONObject boardObject) {
+	public Board parseBoard(JSONObject boardObject) {
 		Board parsedBoard = new Board();
 
 		parsedBoard.setSize( boardObject.getInt(JSON.Game.Board.SIZE) );

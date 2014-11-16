@@ -1,7 +1,7 @@
 package vindinium.bot;
 
 import vindinium.client.api.Response;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 
 /**
  * Interface for a Vindinium bot. Your bot must implement this interface!

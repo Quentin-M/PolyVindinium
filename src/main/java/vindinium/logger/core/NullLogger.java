@@ -1,7 +1,7 @@
 package vindinium.logger.core;
 
 import vindinium.client.api.Response;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 import vindinium.logger.ILogger;
 
 /**

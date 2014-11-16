@@ -1,7 +1,7 @@
 package vindinium.client.api;
 
-import vindinium.game.IGame;
-import vindinium.game.IHero;
+import vindinium.game.core.Game;
+import vindinium.game.core.Hero;
 
 /**
  * A Java POJO for a Vindinium server response.
@@ -10,8 +10,8 @@ public class Response {
 	private final String mToken;
 	private final String mViewUrl;
 	private final String mPlayUrl;
-	private final IGame mGame;
-	private final IHero mHero;
+	private final Game mGame;
+	private final Hero mHero;
 	
 	/**
 	 * Create a new Response object
@@ -22,7 +22,7 @@ public class Response {
 	 * @param game A Java POJO for the game of this response
 	 * @param hero A Java POJO for the hero of this response
 	 */
-	public Response(String token, String viewUrl, String playUrl, IGame game, IHero hero) {
+	public Response(String token, String viewUrl, String playUrl, Game game, Hero hero) {
 		mToken = token;
 		mViewUrl = viewUrl;
 		mPlayUrl = playUrl;
@@ -62,7 +62,7 @@ public class Response {
 	 * 
 	 * @return The Game POJO
 	 */
-	public IGame getGame() {
+	public Game getGame() {
 		return mGame;
 	}
 	
@@ -71,7 +71,7 @@ public class Response {
 	 * 
 	 * @return The Hero POJO
 	 */
-	public IHero getHero() {
+	public Hero getHero() {
 		return mHero;
 	}
 }

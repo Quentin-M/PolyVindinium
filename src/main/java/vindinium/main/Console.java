@@ -3,7 +3,7 @@ package vindinium.main;
 import vindinium.Vindinium;
 import vindinium.bot.core.RandoBot;
 import vindinium.client.core.Config;
-import vindinium.logger.core.BasicLogger;
+import vindinium.logger.core.DebugLogger;
 
 /**
  * A console app that runs a Vindinium game with RandoBot.
@@ -20,7 +20,7 @@ public class Console {
 		
 		System.out.println(String.format("Starting game with configuration: %s", config.toString()));
 		
-		Vindinium vindinium = new Vindinium(config, new BasicLogger());
+		Vindinium vindinium = new Vindinium(config, new DebugLogger());
 		vindinium.playGame(bot);
 	}
 }

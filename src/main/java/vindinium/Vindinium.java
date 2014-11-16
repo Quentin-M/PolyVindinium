@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import vindinium.bot.IBot;
 import vindinium.client.Client;
-import vindinium.client.IConfig;
 import vindinium.client.api.Response;
+import vindinium.client.core.Config;
 import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 import vindinium.logger.ILogger;
 import vindinium.logger.core.NullLogger;
 
@@ -24,7 +24,7 @@ public class Vindinium {
 	 * 
 	 * @param config The game configuration
 	 */
-	public Vindinium(IConfig config) {
+	public Vindinium(Config config) {
 		this(config, null);
 	}
 	
@@ -34,7 +34,7 @@ public class Vindinium {
 	 * @param config The game configuration
 	 * @param logger A logger to use for logging game progress 
 	 */
-	public Vindinium(IConfig config, ILogger logger) {
+	public Vindinium(Config config, ILogger logger) {
 		mClient = new Client(config);
 		setLogger(logger);
 	}

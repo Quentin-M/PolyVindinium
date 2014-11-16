@@ -1,11 +1,9 @@
 package vindinium.game.core;
 
-import vindinium.game.IPosition;
-
 /**
  * Simple implementation of the IPosition interface
  */
-public class Position implements IPosition {
+public class Position {
 	private final int mX;
 	private final int mY;
 	
@@ -26,6 +24,17 @@ public class Position implements IPosition {
 		this.mY = y;
 	}
 	
+	/**
+	 * Copy constructor
+	 * @param position the position to copy
+	 */
+	public Position(Position position) {
+		if(position == null) throw new IllegalArgumentException("Parameter can't be null");
+		
+		mX = position.mX;
+		mY = position.mY;
+	}
+
 	/**
 	 * Get the x value
 	 */

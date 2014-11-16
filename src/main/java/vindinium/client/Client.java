@@ -18,7 +18,7 @@ import vindinium.client.api.Response;
 import vindinium.client.api.ResponseParser;
 import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 
 /**
  * A client for connection to and interacting with a Vindinium server and game.

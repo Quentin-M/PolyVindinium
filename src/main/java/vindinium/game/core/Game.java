@@ -1,18 +1,14 @@
 package vindinium.game.core;
 
-import vindinium.game.IBoard;
-import vindinium.game.IGame;
-import vindinium.game.IHero;
-
 /**
  * A Java POJO that represents a Vindinium Game
  */
-public class Game implements IGame {
+public class Game {
 	private String mId = null;
 	private int mTurn = -1;
 	private int mMaxTurns = -1;
-	private IHero[] mHeroes = null;
-	private IBoard mBoard = null;
+	private Hero[] mHeroes = null;
+	private Board mBoard = null;
 	private boolean mFinished = false;
 	
 	/**
@@ -20,6 +16,27 @@ public class Game implements IGame {
 	 */
 	public Game() {
 		this(null, -1, -1, null, null, false);
+	}
+	
+	/**
+	 * Copy constructor
+	 * @param game the game to copy
+	 */
+	public Game(Game game) {
+		if(game == null) throw new IllegalArgumentException("Parameter can't be null");
+		
+		// Copy array of heroes
+		Hero[] heroes = new Hero[game.mHeroes.length];
+		for(int i = 0; i<heroes.length; i++) {
+			if(game.mHeroes[i]!=null) heroes[i] = new Hero(game.mHeroes[i]);
+		}
+		
+		setId(game.mId);
+		setTurn(game.mTurn);
+		setMaxTurns(game.mMaxTurns);
+		setHeroes(heroes);
+		setBoard(new Board(game.mBoard));
+		setFinished(game.mFinished);
 	}
 	
 	/**
@@ -31,7 +48,7 @@ public class Game implements IGame {
 	 * @param board
 	 * @param finished
 	 */
-	public Game(String id, int turn, int maxTurns, IHero[] heroes, IBoard board, boolean finished) {
+	public Game(String id, int turn, int maxTurns, Hero[] heroes, Board board, boolean finished) {
 		setId(id);
 		setTurn(turn);
 		setMaxTurns(maxTurns);
@@ -91,7 +108,7 @@ public class Game implements IGame {
 	/**
 	 * Get the game's heroes
 	 */
-	public IHero[] getHeroes() {
+	public Hero[] getHeroes() {
 		return mHeroes;
 	}
 
@@ -100,14 +117,14 @@ public class Game implements IGame {
 	 * 
 	 * @param heroes The heroes in this game
 	 */
-	public void setHeroes(IHero[] heroes) {
+	public void setHeroes(Hero[] heroes) {
 		this.mHeroes = heroes;
 	}
 
 	/**
 	 * Get the game's board
 	 */
-	public IBoard getBoard() {
+	public Board getBoard() {
 		return mBoard;
 	}
 
@@ -116,7 +133,7 @@ public class Game implements IGame {
 	 * 
 	 * @param board The board in this game
 	 */
-	public void setBoard(IBoard board) {
+	public void setBoard(Board board) {
 		this.mBoard = board;
 	}
 

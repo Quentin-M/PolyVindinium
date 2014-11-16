@@ -1,11 +1,9 @@
 package vindinium.game.core;
 
-import vindinium.game.IHero;
-
 /**
  * A Java POJO for a Vindinium Hero
  */
-public class Hero implements IHero {
+public class Hero {
 	private int mId = -1;
 	private String mName = null;
 	private String mUserId = null;
@@ -21,7 +19,26 @@ public class Hero implements IHero {
 	 * Default constructor
 	 */
 	public Hero() { }
-	
+
+	/**
+	 * Copy constructor
+	 * @param hero the hero to copy
+	 */
+	public Hero(Hero hero) {
+		if(hero == null) throw new IllegalArgumentException("Parameter can't be null");
+		
+		mId = hero.mId;
+		mName = new String(hero.mName);
+		mUserId = new String(hero.mUserId);
+		mELO = hero.mELO;
+		mPosition = new Position(hero.mPosition);
+		mLife = hero.mLife;
+		mGold = hero.mGold;
+		mMineCount = hero.mMineCount;
+		mSpawnPosition = new Position(hero.mSpawnPosition);
+		mCrashed = hero.mCrashed;
+	}
+
 	/**
 	 * Get the hero's id
 	 */

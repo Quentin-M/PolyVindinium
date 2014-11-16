@@ -4,7 +4,7 @@ import java.util.Random;
 
 import vindinium.bot.IBot;
 import vindinium.client.api.Response;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 
 /**
  * An example Vindinium bot called RandoBot.

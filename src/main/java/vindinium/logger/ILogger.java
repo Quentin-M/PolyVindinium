@@ -1,7 +1,7 @@
 package vindinium.logger;
 
 import vindinium.client.api.Response;
-import vindinium.game.Action;
+import vindinium.game.core.Action;
 
 /**
  * Interface for Vindinium game loggers. Used to log game progress.
