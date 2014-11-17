@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import vindinium.client.api.Response;
 import vindinium.client.api.ResponseParser;
+import vindinium.client.core.Config;
 import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
 import vindinium.game.core.Action;
@@ -30,7 +31,7 @@ public class Client {
 	private static final String KEY_MAP = "map";
 	private static final String KEY_DIRECTION = "dir";
 	
-	private final IConfig mConfig;
+	private final Config mConfig;
 	private final HttpClient mHttpClient;
 	private final String mBaseUrl;
 	private final ResponseParser mParser = new ResponseParser();
@@ -42,7 +43,7 @@ public class Client {
 	 * 
 	 * @param config The configuration to use for this client
 	 */
-	public Client(IConfig config) {
+	public Client(Config config) {
 		mConfig = config;
 		mHttpClient = HttpClientBuilder.create().build();
 		mBaseUrl = String.format("%1$s/%2$s", mConfig.getBaseUrl(), mConfig.getGameMode().toString().toLowerCase());

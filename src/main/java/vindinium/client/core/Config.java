@@ -1,13 +1,12 @@
 package vindinium.client.core;
 
 import vindinium.client.GameMode;
-import vindinium.client.IConfig;
 import vindinium.exception.InvalidConfigurationException;
 
 /**
  * A configuration POJO that can store and validate configuration settings.
  */
-public class Config implements IConfig {
+public class Config {
 	public static final GameMode DEFAULT_GAME_MODE = GameMode.TRAINING;
 	public static final String DEFAULT_BASE_URL = "http://vindinium.org/api";
 	
