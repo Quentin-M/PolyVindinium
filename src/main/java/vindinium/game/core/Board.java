@@ -1,6 +1,7 @@
 package vindinium.game.core;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple implementation of a Vindinium board to help
@@ -8,6 +9,8 @@ import java.util.HashMap;
  */
 public class Board {
 	private static final HashMap<String, Tile> TILE_MAP = new HashMap<String, Tile>();
+	private static final HashMap<Tile, String> CHAR_MAP = new HashMap<Tile, String>();
+	
 	private int mSize = 1;
 	private String mTiles = null;
 	
@@ -19,14 +22,16 @@ public class Board {
 		TILE_MAP.put("@2", Tile.HERO2);
 		TILE_MAP.put("@3", Tile.HERO3);
 		TILE_MAP.put("@4", Tile.HERO4);
-		TILE_MAP.put("$-", Tile.MINE_FREE);
+		TILE_MAP.put("$-", Tile.MINE_NEUTRAL);
 		TILE_MAP.put("$1", Tile.MINE_HERO1);
 		TILE_MAP.put("$2", Tile.MINE_HERO2);
 		TILE_MAP.put("$3", Tile.MINE_HERO3);
 		TILE_MAP.put("$4", Tile.MINE_HERO4);
+		
+		for (Map.Entry<String, Tile> entry : TILE_MAP.entrySet()) {
+		    CHAR_MAP.put(entry.getValue(), entry.getKey());
+		}
 	}
-
-	public Board() { }
 	
 	/**
 	 * Copy construct
@@ -38,6 +43,8 @@ public class Board {
 		mSize = board.mSize;
 		mTiles = new String(board.mTiles);
 	}
+
+	public Board() { }
 
 	/**
 	 * Get the size of the board (all boards are square)
@@ -113,5 +120,30 @@ public class Board {
 		}
 		
 		return tile;
+	}
+
+	/**
+	 * Set a tile at defined coordinates
+	 * @param x
+	 * @param y
+	 * @param t
+	 */
+	public void setTile(int x, int y, Tile t) {
+		// Validate the x and y parameter
+		if( x < 0 || y < 0 || x >= mSize || y >= mSize ) {
+			throw new IllegalArgumentException("Cannot get Tile for an out of bounds (x, y) position");
+		}
+				
+		int start = x + (y * mSize);
+		mTiles = mTiles.substring(0, start) + CHAR_MAP.get(t) + mTiles.substring(start+2);
+	}
+
+	/**
+	 * Replace every tiles t1 by t2
+	 * @param t1
+	 * @param t2
+	 */
+	public void replaceTiles(Tile t1, Tile t2) {
+		mTiles.replaceAll(CHAR_MAP.get(t1), CHAR_MAP.get(t2));
 	}
 }
