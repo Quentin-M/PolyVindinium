@@ -81,18 +81,29 @@ public class Board {
 		mTiles = tiles;
 	}
 	
+	/**
+	 * Get the tile corresponding to the (x,y) coordinate on the board or throw an exception if coordinates are out of bounds
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @return the corresponding tile
+	 */
 	public Tile getTile(int x, int y) {
 		// Validate the x and y parameter
 		if( x < 0 || y < 0 || x >= mSize || y >= mSize ) {
 			throw new IllegalArgumentException("Cannot get Tile for an out of bounds (x, y) position");
 		}
 		
-		int start = x + (y * mSize);
+		int start = x*2 + (y * mSize);
 		String tile = mTiles.substring(start, start + 2);
 		
 		return getTile(tile);
 	}
 	
+	/**
+	 * Get the tile associated to this string or throw an exception if no corresponding tile has been found
+	 * @param tileString
+	 * @return the corresponding tile
+	 */
 	protected Tile getTile(String tileString) {
 		Tile tile = TILE_MAP.get(tileString);
 		
