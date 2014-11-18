@@ -12,14 +12,8 @@ public class Position {
 	 * 
 	 * @param x The x value
 	 * @param y The y value
-	 * @throws IllegalArgumentException Thrown if x or y is less than 0
 	 */
-	public Position(int x, int y) {
-		// Validate the x and y values
-		if( x < 0 || y < 0 ) {
-			throw new IllegalArgumentException("A Vindinium board (x, y) position cannot have negative values");
-		}
-		
+	public Position(int x, int y) {	
 		this.mX = x;
 		this.mY = y;
 	}
