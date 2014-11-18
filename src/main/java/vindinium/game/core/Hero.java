@@ -198,4 +198,8 @@ public class Hero {
 	public void setCrashed(boolean crashed) {
 		this.mCrashed = crashed;
 	}
+	
+	public double getDistanceTo(Hero h) {
+		return Math.sqrt(Math.pow(h.getPosition().getX() - mPosition.getX(), 2) + Math.pow(h.getPosition().getY() - mPosition.getY(), 2));
+	}
 }
