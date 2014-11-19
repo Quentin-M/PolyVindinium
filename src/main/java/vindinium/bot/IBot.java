@@ -20,5 +20,5 @@ public interface IBot {
 	 * @param response The current game state (response)
 	 * @return The bot's next action to take
 	 */
-	public Action getAction(Response response);
+	public Action getAction(final Response response);
 }

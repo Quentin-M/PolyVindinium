@@ -3,7 +3,6 @@ package vindinium.main;
 import vindinium.Vindinium;
 import vindinium.bot.core.RandoBot;
 import vindinium.client.core.Config;
-import vindinium.logger.core.DebugLogger;
 
 /**
  * A console app that runs a Vindinium game with RandoBot.
@@ -18,9 +17,7 @@ public class Console {
 		config.setKey(SECRET_KEY);
 		config.validateConfiguration();
 		
-		System.out.println(String.format("Starting game with configuration: %s", config.toString()));
-		
-		Vindinium vindinium = new Vindinium(config, new DebugLogger());
+		Vindinium vindinium = new Vindinium(config);
 		vindinium.playGame(bot);
 	}
 }
