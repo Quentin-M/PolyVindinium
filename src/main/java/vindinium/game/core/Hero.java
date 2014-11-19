@@ -200,6 +200,6 @@ public class Hero {
 	}
 	
 	public double getDistanceTo(Hero h) {
-		return Math.sqrt(Math.pow(h.getPosition().getX() - mPosition.getX(), 2) + Math.pow(h.getPosition().getY() - mPosition.getY(), 2));
+		return Math.abs(h.getPosition().getX() - mPosition.getX()) + Math.abs(h.getPosition().getY() - mPosition.getY());
 	}
 }
