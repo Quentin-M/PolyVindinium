@@ -146,4 +146,47 @@ public class Board {
 	public void replaceTiles(Tile t1, Tile t2) {
 		mTiles.replaceAll(CHAR_MAP.get(t1), CHAR_MAP.get(t2));
 	}
+	
+	/**
+	 * return a string with the situation of the board (only 1 char for each tile)
+	 * Player's color: red for hero1, blue for hero2, green for hero3, yellow for hero4.
+	 */
+	public String toString(){
+		int boardSize = this.getSize();
+		String board = "", boardTiles = this.getTiles();
+		for (int i = 0; i < (boardTiles.length()) - 1; i+=2){
+			if(boardTiles.charAt(i) == '@'){
+				board += boardTiles.charAt(i+1);
+			}
+			else if(boardTiles.charAt(i) == '$')
+			{
+				switch(boardTiles.charAt(i+1)){
+				case '1':
+					board += 'a';
+					break;
+				case '2':
+					board += 'b';
+					break;
+				case '3':
+					board += 'c';
+					break;
+				case '4':
+					board += 'd';
+					break;
+				case '-':
+					board += '$';
+					break;
+				}
+			}
+			else
+			{
+				board += boardTiles.charAt(i);
+			}
+			
+			if((i/2)%boardSize == boardSize-1){
+				board += "\n";
+			}
+		}
+		return board;
+	}
 }
