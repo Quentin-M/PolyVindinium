@@ -4,16 +4,16 @@ package vindinium.game.core;
  * A Java POJO for a Vindinium Hero
  */
 public class Hero {
-	private int mId = -1;
-	private String mName = null;
-	private String mUserId = null;
-	private int mELO = 0;
-	private Position mPosition = null;
-	private int mLife = 0;
-	private int mGold = 0;
-	private int mMineCount = 0;
-	private Position mSpawnPosition = null;
-	private boolean mCrashed = false;
+	private int id = -1;
+	private String name = null;
+	private String userId = null;
+	private int ELO = 0;
+	private Position position = null;
+	private int life = 0;
+	private int gold = 0;
+	private int mineCount = 0;
+	private Position spawnPosition = null;
+	private boolean crashed = false;
 	
 	/**
 	 * Default constructor
@@ -27,23 +27,23 @@ public class Hero {
 	public Hero(Hero hero) {
 		if(hero == null) throw new IllegalArgumentException("Parameter can't be null");
 		
-		mId = hero.mId;
-		mName = new String(hero.mName);
-		mUserId = new String(hero.mUserId);
-		mELO = hero.mELO;
-		mPosition = new Position(hero.mPosition);
-		mLife = hero.mLife;
-		mGold = hero.mGold;
-		mMineCount = hero.mMineCount;
-		mSpawnPosition = new Position(hero.mSpawnPosition);
-		mCrashed = hero.mCrashed;
+		id = hero.id;
+		name = new String(hero.name);
+		userId = new String(hero.userId);
+		ELO = hero.ELO;
+		position = new Position(hero.position);
+		life = hero.life;
+		gold = hero.gold;
+		mineCount = hero.mineCount;
+		spawnPosition = new Position(hero.spawnPosition);
+		crashed = hero.crashed;
 	}
 
 	/**
 	 * Get the hero's id
 	 */
 	public int getId() {
-		return mId;
+		return id;
 	}
 	
 	/**
@@ -52,14 +52,14 @@ public class Hero {
 	 * @param id The id of the hero
 	 */
 	public void setId(int id) {
-		mId = id;
+		this.id = id;
 	}
 
 	/**
 	 * Get the hero's name
 	 */
 	public String getName() {
-		return mName;
+		return name;
 	}
 
 	/**
@@ -68,14 +68,14 @@ public class Hero {
 	 * @param name The name of the hero
 	 */
 	public void setName(String name) {
-		this.mName = name;
+		this.name = name;
 	}
 
 	/**
 	 * Get the hero's user's id
 	 */
 	public String getUserId() {
-		return mUserId;
+		return userId;
 	}
 
 	/**
@@ -84,14 +84,14 @@ public class Hero {
 	 * @param userId The id of the hero's user
 	 */
 	public void setUserId(String userId) {
-		this.mUserId = userId;
+		this.userId = userId;
 	}
 
 	/**
 	 * Get the hero's ELO rating
 	 */
 	public int getELO() {
-		return mELO;
+		return ELO;
 	}
 
 	/**
@@ -100,14 +100,14 @@ public class Hero {
 	 * @param elo The ELO rating of this hero
 	 */
 	public void setELO(int elo) {
-		this.mELO = elo;
+		this.ELO = elo;
 	}
 
 	/**
 	 * Get the hero's position on the board
 	 */
 	public Position getPosition() {
-		return mPosition;
+		return position;
 	}
 
 	/**
@@ -116,14 +116,14 @@ public class Hero {
 	 * @param position The position of the hero on the board
 	 */
 	public void setPosition(Position position) {
-		this.mPosition = position;
+		this.position = position;
 	}
 
 	/**
 	 * Get the hero's life points
 	 */
 	public int getLife() {
-		return mLife;
+		return life;
 	}
 
 	/**
@@ -132,14 +132,14 @@ public class Hero {
 	 * @param life The life points of this hero
 	 */
 	public void setLife(int life) {
-		this.mLife = life;
+		this.life = life;
 	}
 
 	/**
 	 * Get the hero's gold count
 	 */
 	public int getGold() {
-		return mGold;
+		return gold;
 	}
 
 	/**
@@ -148,14 +148,14 @@ public class Hero {
 	 * @param gold The gold count for this hero
 	 */
 	public void setGold(int gold) {
-		this.mGold = gold;
+		this.gold = gold;
 	}
 
 	/**
 	 * Get the hero's owned mine count
 	 */
 	public int getMineCount() {
-		return mMineCount;
+		return mineCount;
 	}
 
 	/**
@@ -164,14 +164,14 @@ public class Hero {
 	 * @param mineCount The owned mine count for this hero
 	 */
 	public void setMineCount(int mineCount) {
-		this.mMineCount = mineCount;
+		this.mineCount = mineCount;
 	}
 
 	/**
 	 * Get the hero's spawn position on the board
 	 */
 	public Position getSpawnPosition() {
-		return mSpawnPosition;
+		return spawnPosition;
 	}
 
 	/**
@@ -180,14 +180,14 @@ public class Hero {
 	 * @param spawnPosition The spawn position of the hero on the board
 	 */
 	public void setSpawnPosition(Position spawnPosition) {
-		this.mSpawnPosition = spawnPosition;
+		this.spawnPosition = spawnPosition;
 	}
 
 	/**
 	 * Get the hero's crash state
 	 */
 	public boolean isCrashed() {
-		return mCrashed;
+		return crashed;
 	}
 
 	/**
@@ -196,10 +196,15 @@ public class Hero {
 	 * @param crashed TRUE = crashed
 	 */
 	public void setCrashed(boolean crashed) {
-		this.mCrashed = crashed;
+		this.crashed = crashed;
 	}
 	
+	/**
+	 * Return Manhattan distance to another hero
+	 * @param h the target hero
+	 * @return distance to another hero
+	 */
 	public double getDistanceTo(Hero h) {
-		return Math.abs(h.getPosition().getX() - mPosition.getX()) + Math.abs(h.getPosition().getY() - mPosition.getY());
+		return Math.abs(h.getPosition().getX() - position.getX()) + Math.abs(h.getPosition().getY() - position.getY());
 	}
 }

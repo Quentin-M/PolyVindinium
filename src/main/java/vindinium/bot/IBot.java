@@ -1,7 +1,7 @@
 package vindinium.bot;
 
-import vindinium.client.api.Response;
 import vindinium.game.core.Action;
+import vindinium.game.core.Game;
 
 /**
  * Interface for a Vindinium bot. Your bot must implement this interface!
@@ -20,5 +20,5 @@ public interface IBot {
 	 * @param response The current game state (response)
 	 * @return The bot's next action to take
 	 */
-	public Action getAction(final Response response);
+	public Action getAction(final Game response);
 }

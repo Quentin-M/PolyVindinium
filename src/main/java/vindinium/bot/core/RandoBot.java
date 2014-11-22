@@ -3,8 +3,8 @@ package vindinium.bot.core;
 import java.util.Random;
 
 import vindinium.bot.IBot;
-import vindinium.client.api.Response;
 import vindinium.game.core.Action;
+import vindinium.game.core.Game;
 
 /**
  * An example Vindinium bot called RandoBot.
@@ -29,7 +29,7 @@ public class RandoBot implements IBot {
 	/**
 	 * Get RandoBot's next move, randomly!
 	 */
-	public Action getAction(Response response) {
+	public Action getAction(Game Game) {
 		return mActions[mRandom.nextInt(mActions.length)];
 	}
 }

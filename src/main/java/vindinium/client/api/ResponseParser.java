@@ -3,10 +3,10 @@ package vindinium.client.api;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import vindinium.game.core.Board;
 import vindinium.game.core.Game;
 import vindinium.game.core.Hero;
 import vindinium.game.core.Position;
+import vindinium.game.core.Tile;
 
 /**
  * A parser for deserializing a JSON response from a Vindinium server and turning
@@ -14,95 +14,84 @@ import vindinium.game.core.Position;
  */
 public class ResponseParser {
 	/**
-	 * Parses a JSONObject into a Java Response POJO.
+	 * Parses a JSONObject into Game object
+	 * If game object is null, create a new one
 	 * 
 	 * @param response A JSONObject in the response data schema expected from a Vindinium server
-	 * @return A Response object POJO representing the json object
+	 * @return A new or updated game object
 	 */
-	public Response parseResponseJson(JSONObject response) {
-		Game parsedGame = new Game();
-		Hero parsedHero = null;
-		
-		// Parse first level attributes
+	public static Game parseResponseJson(Game game, JSONObject response) {
 		JSONObject gameObject = response.getJSONObject(JSON.GAME);
 		JSONObject heroObject = response.getJSONObject(JSON.HERO);
-		String token = response.getString(JSON.TOKEN);
-		String viewUrl = response.getString(JSON.VIEW_URL);
-		String playUrl = response.getString(JSON.PLAY_URL);
-		// End first level attributes
-		
-		// Parse game level attributes
-		parsedGame.setId( gameObject.getString(JSON.Game.ID) );
-		parsedGame.setTurn( gameObject.getInt(JSON.Game.TURN) );
-		parsedGame.setMaxTurns( gameObject.getInt(JSON.Game.MAX_TURNS) );
-		parsedGame.setFinished( gameObject.getBoolean(JSON.Game.FINISHED) );
-		
-		// Parse heroes array
-		JSONArray heroesArray = gameObject.getJSONArray(JSON.Game.HEROES);
-		Hero[] heroes = new Hero[heroesArray.length()];
-		for( int i = 0; i < heroesArray.length(); ++i ) {
-			JSONObject currentHeroObject = heroesArray.getJSONObject(i);
-			heroes[i] = parseHero(currentHeroObject);
-		}
-		parsedGame.setHeroes(heroes);
-		// End parse heroes array
-		
-		// Parse board
 		JSONObject boardObject = gameObject.getJSONObject(JSON.Game.BOARD);
-		parsedGame.setBoard( parseBoard(boardObject) );
-		// End parse board
-		// End game level attributes
+		JSONArray heroesArray = gameObject.getJSONArray(JSON.Game.HEROES);
+		String tiles = boardObject.getString(JSON.Game.Board.TILES);
 		
-		// Parse hero level attributes
-		parsedHero = parseHero(heroObject);
-		// End hero level attributes
+		if(game==null) {
+			// It is a new game, create an entire game object
+			game = new Game(gameObject.getString(JSON.Game.ID), gameObject.getInt(JSON.Game.MAX_TURNS), response.getString(JSON.TOKEN), response.getString(JSON.VIEW_URL), response.getString(JSON.PLAY_URL), boardObject.getInt(JSON.Game.Board.SIZE), heroObject.getInt(JSON.Hero.ID)-1);
+						
+			// Create board
+			for(int i = 0; i<tiles.length(); i+=2) {
+				int x = (i/2) / game.getBoard().getSize();
+				int y = (i/2) % game.getBoard().getSize();
+				Tile t = JSON.Game.Board.TILE_MAP.get(tiles.substring(i, i+2));
+				
+				game.getBoard().setTile(x, y, t);
+				
+				if(Tile.isMine(t)) {
+					// Create mine
+					game.getBoard().getMines().add(new Position(x, y));
+				} else if(t == Tile.TAVERN) {
+					// Create tavern
+					game.getBoard().getTaverns().add(new Position(x, y));
+				}
+			}
+			
+			// Parse heroes
+			for(int i = 0; i < heroesArray.length(); i++) {
+				JSONObject currentHeroObject = heroesArray.getJSONObject(i);
+				
+				game.getHeroes()[i] = new Hero();
+				game.getHeroes()[i].setId(currentHeroObject.getInt(JSON.Hero.ID)-1);
+				game.getHeroes()[i].setName(currentHeroObject.getString(JSON.Hero.NAME));
+				game.getHeroes()[i].setUserId(currentHeroObject.optString(JSON.Hero.USER_ID));
+				game.getHeroes()[i].setELO(currentHeroObject.optInt(JSON.Hero.ELO, 0));
+			}
+		}
 		
-		return new Response(token, viewUrl, playUrl, parsedGame, parsedHero);
-	}
-	
-	/**
-	 * Parse a Hero JSONObject into a Java Hero POJO.
-	 * 
-	 * @param heroObject A JSONObject in the hero data schema expected from a Vindinium server
-	 * @return A Hero object POJO representing the json object
-	 */
-	public Hero parseHero(JSONObject heroObject) {
-		Hero parsedHero = new Hero();
+		// Update game state
+		game.setTurn(gameObject.getInt(JSON.Game.TURN));
+		game.setFinished(gameObject.getBoolean(JSON.Game.FINISHED));
 		
-		parsedHero.setId( heroObject.getInt(JSON.Hero.ID) );
-		parsedHero.setName( heroObject.getString(JSON.Hero.NAME) );
-		parsedHero.setUserId( heroObject.optString(JSON.Hero.USER_ID) );
-		parsedHero.setELO( heroObject.optInt(JSON.Hero.ELO, 0) );
-		parsedHero.setLife( heroObject.getInt(JSON.Hero.LIFE) );
-		parsedHero.setGold( heroObject.getInt(JSON.Hero.GOLD) );
-		parsedHero.setMineCount( heroObject.getInt(JSON.Hero.MINE_COUNT) );
-		parsedHero.setCrashed( heroObject.getBoolean(JSON.Hero.CRASHED) );
+		// Update mine tiles
+		for(Position m: game.getBoard().getMines()) {
+			game.getBoard().setTile(m.getX(), m.getY(), JSON.Game.Board.TILE_MAP.get(tiles.substring((m.getX()*2*game.getBoard().getSize())+m.getY()*2, (m.getX()*2*game.getBoard().getSize())+m.getY()*2+2)));
+		}
 		
-		JSONObject positionObject = heroObject.getJSONObject(JSON.Hero.POSITION);
-		int positionX = positionObject.getInt(JSON.Hero.Position.X);
-		int positionY = positionObject.getInt(JSON.Hero.Position.Y);
-		parsedHero.setPosition(new Position(positionX, positionY));
+		// Update heroes
+		for(int i = 0; i < heroesArray.length(); ++i ) {
+			JSONObject currentHeroObject = heroesArray.getJSONObject(i);
+			
+			game.getHeroes()[i].setLife(currentHeroObject.getInt(JSON.Hero.LIFE));
+			game.getHeroes()[i].setGold(currentHeroObject.getInt(JSON.Hero.GOLD));
+			game.getHeroes()[i].setMineCount(currentHeroObject.getInt(JSON.Hero.MINE_COUNT));
+			game.getHeroes()[i].setCrashed(currentHeroObject.getBoolean(JSON.Hero.CRASHED));
+			
+			// Remove old tile on the map
+			if(game.getHeroes()[i].getPosition() != null)
+				game.getBoard().setTile(game.getHeroes()[i].getPosition().getX(), game.getHeroes()[i].getPosition().getY(), Tile.AIR);
+			
+			JSONObject positionObject = currentHeroObject.getJSONObject(JSON.Hero.POSITION);
+			game.getHeroes()[i].setPosition(new Position(positionObject.getInt(JSON.Hero.Position.X), positionObject.getInt(JSON.Hero.Position.Y)));
+			
+			// Add tile on the map
+			game.getBoard().setTile(game.getHeroes()[i].getPosition().getX(), game.getHeroes()[i].getPosition().getY(), Tile.getHero(i));
+			
+			JSONObject spawnPositionObject = currentHeroObject.getJSONObject(JSON.Hero.SPAWN_POSITION);
+			game.getHeroes()[i].setSpawnPosition(new Position(spawnPositionObject.getInt(JSON.Hero.Position.X), spawnPositionObject.getInt(JSON.Hero.Position.Y)));
+		}
 		
-		JSONObject spawnPositionObject = heroObject.getJSONObject(JSON.Hero.SPAWN_POSITION);
-		int spawnPositionX = spawnPositionObject.getInt(JSON.Hero.Position.X);
-		int spawnPositionY = spawnPositionObject.getInt(JSON.Hero.Position.Y);
-		parsedHero.setSpawnPosition(new Position(spawnPositionX, spawnPositionY));
-		
-		return parsedHero;
-	}
-	
-	/**
-	 * Parse a Board JSONObject into a Java Board POJO.
-	 * 
-	 * @param boardObject A JSONObject in the board data schema expected from a Vindinium server
-	 * @return A IBoard object POJO representing the json object
-	 */
-	public Board parseBoard(JSONObject boardObject) {
-		Board parsedBoard = new Board();
-
-		parsedBoard.setSize( boardObject.getInt(JSON.Game.Board.SIZE) );
-		parsedBoard.setTiles( boardObject.getString(JSON.Game.Board.TILES) );
-		
-		return parsedBoard;
+		return game;
 	}
 }

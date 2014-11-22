@@ -1,6 +1,10 @@
 package vindinium.main;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import vindinium.Vindinium;
+import vindinium.bot.IBot;
 import vindinium.bot.core.RandoBot;
 import vindinium.client.core.Config;
 
@@ -10,8 +14,10 @@ import vindinium.client.core.Config;
 public class Console {
 	private static final String SECRET_KEY = "oclehzwz";
 	
-	public static void main(String[] args) throws Exception {
-		RandoBot bot = new RandoBot();
+	final static Logger logger = LogManager.getLogger(Console.class);
+	
+	public static void main(String[] args) throws Exception {		
+		IBot bot = new RandoBot();
 		
 		Config config = new Config();
 		config.setKey(SECRET_KEY);

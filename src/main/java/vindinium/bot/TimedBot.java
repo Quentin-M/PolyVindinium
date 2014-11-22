@@ -1,14 +1,14 @@
 package vindinium.bot;
 
-import vindinium.client.api.Response;
 import vindinium.game.core.Action;
+import vindinium.game.core.Game;
 
 public abstract class TimedBot implements IBot {
 	private long time = Long.MAX_VALUE;
 	
-	public Action getAction(final Response response) {
+	public Action getAction(final Game game) {
 		long time = System.currentTimeMillis();
-		Action action = getMoveDecision(response);
+		Action action = getMoveDecision(game);
 		time = System.currentTimeMillis()-time;
 		
 		return action;
@@ -22,5 +22,5 @@ public abstract class TimedBot implements IBot {
 		return time;
 	}
 	
-	public abstract Action getMoveDecision(final Response response);
+	public abstract Action getMoveDecision(final Game game);
 }

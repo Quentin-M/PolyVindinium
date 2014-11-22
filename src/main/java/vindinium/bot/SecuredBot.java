@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import vindinium.client.api.Response;
 import vindinium.game.core.Action;
+import vindinium.game.core.Game;
 
 public abstract class SecuredBot extends TimedBot {
 	long timeOut = 950;
@@ -27,12 +27,12 @@ public abstract class SecuredBot extends TimedBot {
 	}
 	
 	@Override
-	public Action getMoveDecision(final Response response) {
+	public Action getMoveDecision(final Game game) {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		
 		Callable<Action> alphaBetaAlgorithm = new Callable<Action>() {
 		    public Action call() throws Exception {
-		    	return getAction(response);
+		    	return getAction(game);
 			}
 		};
 		
@@ -43,7 +43,7 @@ public abstract class SecuredBot extends TimedBot {
 		try {
 			action = future.get(timeOut, TimeUnit.MILLISECONDS);
 		} catch(TimeoutException te) {
-			action = getTimeoutAction(response);
+			action = getTimeoutAction(game);
 		} catch(Exception e) { }
 		
 		if(!executor.isTerminated()) executor.shutdownNow();
@@ -51,6 +51,7 @@ public abstract class SecuredBot extends TimedBot {
 		return action;
 	}
 
-	public abstract Action getAction(Response response);
-	public abstract Action getTimeoutAction(Response response);
+	@Override
+	public abstract Action getAction(Game game);
+	public abstract Action getTimeoutAction(Game game);
 }
