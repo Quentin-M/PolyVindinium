@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import vindinium.bot.IBot;
 import vindinium.client.Client;
 import vindinium.client.core.Config;
+import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
 import vindinium.game.core.Action;
 import vindinium.game.core.Game;
@@ -37,8 +38,9 @@ public class Vindinium {
 	 * @param bot The bot to use in this game.
 	 * @throws GameStateException Thrown if the game is in an invalid state (should only occur in multi-threaded environment)
 	 * @throws IOException Thrown if the server cannot be reached
+	 * @throws CrashedException  Thrown if the bot took too long to play
 	 */
-	public void playGame(IBot bot) throws GameStateException, IOException {
+	public void playGame(IBot bot) throws GameStateException, IOException, CrashedException {
 		// Start a new game
 		Game game = client.startGame();
 		

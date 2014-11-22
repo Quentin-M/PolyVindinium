@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import vindinium.client.api.ResponseParser;
 import vindinium.client.core.Config;
+import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
 import vindinium.game.core.Action;
 import vindinium.game.core.Game;
@@ -93,11 +94,12 @@ public class Client {
 	 * @param action The move action to send
 	 * @return The response to the move
 	 * @throws GameStateException Thrown if a game is not currently in progress
+	 * @throws CrashedException Thrown if the move was sent too late, and the hero has crashed
 	 * @throws IOException Thrown if the client fails to communicate with the Vindinium server
 	 * @throws JSONException Thrown if the client fails to communicate with the Vindinium server
 
 	 */
-	public Game sendMove(Game game, Action action) throws GameStateException, IOException {
+	public Game sendMove(Game game, Action action) throws GameStateException, IOException, CrashedException {
 		// Check if a game is started (if not BURN IT TO THE GROUND)
 		if(!gameStarted ) {
 			throw new GameStateException("Game has not started yet");
@@ -105,13 +107,15 @@ public class Client {
 		
 		// Create the move request
 		HttpPost sendMoveRequest = createSendMoveRequest(game.getPlayUrl(), action);
-		
 		try {
 			// Send the move request, get a response
 			HttpResponse sendMoveResponse = httpClient.execute(sendMoveRequest);
 			
 			// Parse the response
-			JSONObject jsonResponse = new JSONObject(EntityUtils.toString(sendMoveResponse.getEntity()));
+			String sendMoveResponseEntity = EntityUtils.toString(sendMoveResponse.getEntity());
+			if(sendMoveResponseEntity.startsWith("Vindinium - Time out!")) throw new CrashedException();
+			
+			JSONObject jsonResponse = new JSONObject(sendMoveResponseEntity);
 			game = ResponseParser.parseResponseJson(game, jsonResponse);
 			
 			// If the game is finished, set game started to false so we can play again
