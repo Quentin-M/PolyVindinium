@@ -32,7 +32,7 @@ public abstract class SecuredBot extends TimedBot {
 		
 		Callable<Action> alphaBetaAlgorithm = new Callable<Action>() {
 		    public Action call() throws Exception {
-		    	return getAction(game);
+		    	return getSecuredAction(game);
 			}
 		};
 		
@@ -51,7 +51,6 @@ public abstract class SecuredBot extends TimedBot {
 		return action;
 	}
 
-	@Override
-	public abstract Action getAction(Game game);
+	public abstract Action getSecuredAction(Game game);
 	public abstract Action getTimeoutAction(Game game);
 }

@@ -52,7 +52,7 @@ public class Game {
 		maxTurns = game.maxTurns;
 		
 		heroIndex = game.heroIndex;
-		Hero[] heroes = new Hero[game.heroes.length];
+		heroes = new Hero[game.heroes.length];
 		for(int i = 0; i<heroes.length; i++) {
 			if(game.heroes[i]!=null) heroes[i] = new Hero(game.heroes[i]);
 		}

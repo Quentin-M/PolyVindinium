@@ -7,10 +7,10 @@ public abstract class TimedBot implements IBot {
 	private long time = Long.MAX_VALUE;
 	
 	public Action getAction(final Game game) {
-		long time = System.currentTimeMillis();
+		long t = System.currentTimeMillis();
 		Action action = getMoveDecision(game);
-		time = System.currentTimeMillis()-time;
-		
+		time = System.currentTimeMillis()-t;
+
 		return action;
 	}
 
