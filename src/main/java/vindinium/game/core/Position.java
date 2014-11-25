@@ -42,4 +42,8 @@ public class Position {
 	public int getY() {
 		return y;
 	}
+	
+	public boolean equals(Position p){
+		return (x == p.x && y == p.y);
+	}
 }
