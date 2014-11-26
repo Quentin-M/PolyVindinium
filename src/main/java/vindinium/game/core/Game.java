@@ -1,5 +1,7 @@
 package vindinium.game.core;
 
+import java.util.Arrays;
+
 /**
  * A Java POJO that represents a Vindinium Game
  */
@@ -227,5 +229,47 @@ public class Game {
 		output += "********************************************************************************************************\r\n";
 		
 		return output;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 * 
+	 * We only use these fields: board, finished state, hero index, heroes and game id
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		
+		result = prime * result + ((board == null) ? 0 : board.hashCode());
+		result = prime * result + (finished ? 1231 : 1237);
+		result = prime * result + heroIndex;
+		result = prime * result + Arrays.hashCode(heroes);
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 * 
+	 * We only compare board, finished state, hero index, heroes and game id
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof Game)) return false;
+		
+		Game other = (Game) obj;
+		if (board == null && other.board != null) return false;
+		else if (!board.equals(other.board)) return false;
+		if (finished != other.finished) return false;
+		if (heroIndex != other.heroIndex) return false;
+		if (!Arrays.equals(heroes, other.heroes)) return false;
+		if (id == null && other.id != null) return false;
+		else if (!id.equals(other.id)) return false;
+		
+		return true;
 	}
 }

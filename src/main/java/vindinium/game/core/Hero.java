@@ -207,4 +207,54 @@ public class Hero {
 	public double getDistanceTo(Hero h) {
 		return Math.abs(h.getPosition().getX() - position.getX()) + Math.abs(h.getPosition().getY() - position.getY());
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		
+		result = prime * result + ELO;
+		result = prime * result + (crashed ? 1231 : 1237);
+		result = prime * result + gold;
+		result = prime * result + id;
+		result = prime * result + life;
+		result = prime * result + mineCount;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((position == null) ? 0 : position.hashCode());
+		result = prime * result + ((spawnPosition == null) ? 0 : spawnPosition.hashCode());
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof Hero)) return false;
+		
+		Hero other = (Hero) obj;
+		if (ELO != other.ELO) return false;
+		if (crashed != other.crashed) return false;
+		if (gold != other.gold) return false;
+		if (id != other.id) return false;
+		if (life != other.life) return false;
+		if (mineCount != other.mineCount) return false;
+		if (name == null) if (other.name != null) return false;
+		else if (!name.equals(other.name)) return false;
+		if (position == null) if (other.position != null) return false;
+		else if (!position.equals(other.position)) return false;
+		if (spawnPosition == null) if (other.spawnPosition != null) return false;
+		else if (!spawnPosition.equals(other.spawnPosition)) return false;
+		if (userId == null) if (other.userId != null) return false;
+		else if (!userId.equals(other.userId)) return false;
+		
+		return true;
+	}
 }

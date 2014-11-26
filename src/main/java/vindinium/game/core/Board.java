@@ -1,6 +1,7 @@
 package vindinium.game.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A simple implementation of a Vindinium board to help
@@ -121,5 +122,39 @@ public class Board {
 			board += "\r\n";
 		}
 		return board;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		
+		result = prime * result + Arrays.hashCode(data);
+		result = prime * result + size;
+		
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof Board)) return false;
+		
+		Board other = (Board) obj;
+		if (!Arrays.deepEquals(data, other.data)) return false;
+		if (mines == null && other.mines != null) return false;
+		else if (!mines.equals(other.mines)) return false;
+		if (size != other.size) return false;
+		if (taverns == null && other.taverns != null) return false;
+		else if (!taverns.equals(other.taverns)) return false;
+		
+		return true;
 	}
 }
