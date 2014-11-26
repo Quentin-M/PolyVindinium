@@ -1,5 +1,9 @@
 package vindinium.game.core;
 
+import java.util.ArrayList;
+
+import vindinium.bot.core.ShortestPath;
+
 /**
  * A Java POJO for a Vindinium Hero
  */
@@ -200,14 +204,26 @@ public class Hero {
 	}
 	
 	/**
-	 * Return Manhattan distance to another hero
-	 * @param h the target hero
-	 * @return distance to another hero
+	 * Return Manhattan distance to another hero (doesn't take care of obstacles)
+	 * @param p the target position
+	 * @return distance to a position
 	 */
-	public double getDistanceTo(Hero h) {
-		return Math.abs(h.getPosition().getX() - position.getX()) + Math.abs(h.getPosition().getY() - position.getY());
+	public int getDistanceTo(Position p) {
+		return Math.abs(p.getX() - position.getX()) + Math.abs(p.getY() - position.getY());
 	}
 	
+	/**
+	 * Return exact distance to another hero
+	 * @param p the target position
+	 * @return distance to a position or Integer.MAX_VALUE if we didn't find any path
+	 * @throws NoPathException throwed if no path can be found
+	 */
+	public int getExactDistanceTo(Board b, Position p) throws NoPathException {
+		ArrayList<Position> path = ShortestPath.aStar(b, position, p);
+		
+		return path.size() - 2; // (Exclude start and end)
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

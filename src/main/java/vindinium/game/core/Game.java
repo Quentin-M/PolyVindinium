@@ -195,6 +195,9 @@ public class Game {
 	}
 	
 	@Override
+	/**
+	 * Return a string representation of this game
+	 */
 	public String toString() {
 		String output = "********************************************************************************************************\r\n";
 		
