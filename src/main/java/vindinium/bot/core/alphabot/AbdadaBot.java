@@ -56,10 +56,15 @@ public class AbdadaBot extends SecuredBot {
 		public int score;
 		public Action move;
 		
-		
 		public AlphaBetaResult(int s, Action m) {
 			score = s;
 			move = m;			
+		}
+
+
+		public AlphaBetaResult(AlphaBetaResult best) {
+			score = best.score;
+			move = best.move;
 		}
 	}
 	
@@ -114,7 +119,7 @@ public class AbdadaBot extends SecuredBot {
 	 */
 	public Action getSecuredAction(final Game game) {	
 		TT = new ConcurrentHashMap<Game, AbdadaTTNode>();
-		
+
 		Future<Action>[] futures = new Future[threads];
 		for(int i = 0; i<threads; i++) {
 			final int ii = i;
@@ -123,17 +128,19 @@ public class AbdadaBot extends SecuredBot {
 	    		    public Action call() throws Exception {
 	    		    	Thread.currentThread().setName("AlphaBeta N°" + ii);
 	    		    	
-	    		    	return alphaBeta(game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false).move;
+	    		    	return alphaBeta(game, depth, Integer.MIN_VALUE+1, Integer.MAX_VALUE, 1, false).move;
 	    			}
 	    		}
 	    	);
         }
-
+		
         // Wait until first is done
         Action action = null;
-        while(action == null) {
+        boolean isDone = false;
+        while(!isDone) {
         	for(int i = 0; i<threads; i++) {
         		if(futures[i].isDone()) {
+        			isDone = true;
         			try {
 						action = futures[i].get();
 					} catch (Exception e) {}
@@ -146,9 +153,7 @@ public class AbdadaBot extends SecuredBot {
         for(int i = 0; i<threads; i++) {
         	futures[i].cancel(true);
         }
-		
-		logger.info("Abdada ran in " + this.getExecutionTime() + "ms");
-		
+        
 		return action;
 	}
 	
@@ -168,7 +173,7 @@ public class AbdadaBot extends SecuredBot {
 	////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////
 	
-	private AlphaBetaResult alphaBeta(Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {
+	private AlphaBetaResult alphaBeta(Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {		
 		// Leaf node, compute score
 		if(depth==0 || currentGame.isFinished()) {
 			return new AlphaBetaResult(maximizing*heuristic.evaluate(currentGame), null);
@@ -178,15 +183,24 @@ public class AbdadaBot extends SecuredBot {
 		
 		// TT Lookup
 		AbdadaTTNode ttEntry;
-		//synchronized(TT) {
+		synchronized(TT) {
 			ttEntry = TT.get(currentGame);
+			boolean ttEntryIsNew = false;
+			
+			if(ttEntry==null) {
+				// Doesn't exist yet, create it and add it with nproc=1, flag=UNSET, value=null, depth=depth
+				ttEntry = new AbdadaTTNode(depth);
+				TT.put(currentGame, ttEntry);
+				
+				ttEntryIsNew = true;
+			}
 			
 			// - Exclusivity case
-			if(ttEntry != null && ttEntry.depth == depth && exclusiveP && ttEntry.nproc > 0) {
+			if(ttEntry.depth == depth && exclusiveP && ttEntry.nproc > 0) {
 				best.score = ON_EVALUATION;
 			}
 			// - Else
-			else if(ttEntry != null && ttEntry.depth >= depth) {				
+			else if(!ttEntryIsNew && ttEntry.depth >= depth) {				
 				if(ttEntry.flag == AbdadaTTNode.EXACT) {
 					best = ttEntry.value;
 					a = ttEntry.value.score;
@@ -205,62 +219,60 @@ public class AbdadaBot extends SecuredBot {
 				if(ttEntry.depth == depth && a < b) {
 					ttEntry.nproc++;
 				}
-			} else {
-				// Doesn't exist yet, create it and add it with nproc=1, flag=UNSET, value=null, depth=depth
-				ttEntry = new AbdadaTTNode(depth);
-				TT.put(currentGame, ttEntry);
 			}
-		//}
+		}
 		
 		// Alpha-beta cutoff or exclusivity case
-		if(a>=b || best.score == ON_EVALUATION) return best;
+		if(a>=b || best.score == ON_EVALUATION) return new AlphaBetaResult(best);
 		
 		// Generate list of children
 		ArrayList<AlphaBetaChild> children = generateNextGames(currentGame, maximizing);
-
+				
 		// Main algorithm
 		boolean allDone = false;
 		for (int iteration = 0; iteration < 2 && a < b && !allDone; iteration++) {
 			allDone = true;
-			
+
 			int i = 0;
 			AlphaBetaChild M = children.get(i);
 			while(M != null && a < b) {
-				boolean exclusive = ((iteration==0) && (i!=0));
-								
+				// Skip first son on 2nd iteration
+				if(iteration==1 && i==0) {
+					i++;
+					if(i>=children.size()) M = null;
+					else M = children.get(i);
+				}
+				
+				boolean exclusive = ((iteration==0) && (i>0));
+				
 				AlphaBetaResult child_result = alphaBeta(M.game, depth - 1, -b, -Math.max(a, best.score), -maximizing, exclusive);
 				child_result.score = -child_result.score;
 				child_result.move = M.move;
-								
+
 				if(child_result.score == -ON_EVALUATION) {
 					allDone = false;
 				} else if(child_result.score > best.score) {
 					best = child_result;
-
-					if(best.score > b) break;
+					
+					if(best.score >= b) break;
 				}
 				
 				i++;
 				if(i>=children.size()) M = null;
 				else M = children.get(i);
 			}
-			
-			if(best.score > b) break;
 		}
 		
 		// Transposition Table Store; node is the lookup key for ttEntry
-		//synchronized(TT) {
+		synchronized(TT) {
 			ttEntry = TT.get(currentGame);
-			
-			if(ttEntry==null) ttEntry = new AbdadaTTNode(depth);
-			else ttEntry = new AbdadaTTNode(ttEntry);
-			
+
 			if(ttEntry.depth <= depth) {			
 				if(ttEntry.depth == depth) ttEntry.nproc--;
 				else ttEntry.nproc = 0;
 				
-				if(best.score > b) ttEntry.flag = AbdadaTTNode.LOWERBOUND;
-				else if(best.score <= a) ttEntry.flag = AbdadaTTNode.UPPERBOUND;
+				if(best.score >= b) ttEntry.flag = AbdadaTTNode.LOWERBOUND;
+				else if(best.score < a) ttEntry.flag = AbdadaTTNode.UPPERBOUND;
 				else ttEntry.flag = AbdadaTTNode.EXACT;
 				
 				ttEntry.value = best;
@@ -268,7 +280,7 @@ public class AbdadaBot extends SecuredBot {
 				
 				TT.put(currentGame, ttEntry);
 			}
-		//}
+		}
 
 		return best;
 	}

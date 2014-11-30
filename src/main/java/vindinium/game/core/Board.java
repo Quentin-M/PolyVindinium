@@ -132,8 +132,10 @@ public class Board {
 		final int prime = 31;
 		int result = 1;
 		
-		result = prime * result + Arrays.hashCode(data);
+		//result = prime * result + Arrays.hashCode(data);
+		result = prime * result + ((mines == null) ? 0 : mines.hashCode());
 		result = prime * result + size;
+		result = prime * result + ((taverns == null) ? 0 : taverns.hashCode());
 		
 		return result;
 	}
@@ -148,9 +150,9 @@ public class Board {
 		if (!(obj instanceof Board)) return false;
 		
 		Board other = (Board) obj;
-		if (!Arrays.deepEquals(data, other.data)) return false;
+		//if (!Arrays.deepEquals(data, other.data)) return false;
 		if (mines == null && other.mines != null) return false;
-		else if (!mines.equals(other.mines)) return false;
+		else if(!mines.equals(other.mines)) return false;
 		if (size != other.size) return false;
 		if (taverns == null && other.taverns != null) return false;
 		else if (!taverns.equals(other.taverns)) return false;
