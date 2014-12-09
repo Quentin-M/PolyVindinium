@@ -65,13 +65,7 @@ public class ShortestPath {
 		
 		throw new NoPathException("There is no path between " + start + " and " + end);
 	}
-
-	private static boolean isAccessible(Board board, Position position) {
-		if(position.getX() < 0 || position.getY() < 0 || position.getX() >= board.getSize() || position.getY() >= board.getSize()) return false;
-		Tile t = board.getTile(position.getX(), position.getY());
-		return (t == Tile.AIR);
-	}
-
+	
 	private static ArrayList<Position> reconstructPath(HashMap<Position, Position> cameFrom, Position end) {
 		ArrayList<Position> path = new ArrayList<Position>();
 		
@@ -90,6 +84,13 @@ public class ShortestPath {
 		
 		return path;
 	}
+	
+	private static boolean isAccessible(Board board, Position position) {
+		if(position.getX() < 0 || position.getY() < 0 || position.getX() >= board.getSize() || position.getY() >= board.getSize()) return false;
+		Tile t = board.getTile(position.getX(), position.getY());
+		return (t == Tile.AIR);
+	}
+
 
 	private static Position findBestFromOpenedList(HashSet<Position> openedList, HashMap<Position, Integer> f) {
 		int min = Integer.MAX_VALUE;
@@ -102,5 +103,119 @@ public class ShortestPath {
 			}
 		}
 		return minPosition;
+	}
+
+	public static FloydResult Floyd(Board board){
+		int i, j, k, x, y, d[][], p[][], tableSize = board.getSize() * board.getSize(), boardSize = board.getSize();
+		d = new int [tableSize][tableSize];
+		p = new int [tableSize][tableSize];
+		Tile currentTile;
+		FloydResult res = new FloydResult();
+		
+		// Calculating the initial cost matrix -> the cost from a point to of his neighbours is always 1
+		
+		for (i = 0; i < tableSize; i++) {
+	        for (j = 0; j < tableSize; j++) {
+	            d[i][j] = Integer.MAX_VALUE;
+	        }
+	    }
+		
+		for(i = 0; i < tableSize; i++) {
+			currentTile = board.getTile(i);
+			System.out.print(currentTile);
+			if(currentTile == Tile.AIR || currentTile == Tile.HERO0 || currentTile == Tile.HERO1 || currentTile == Tile.HERO2 || currentTile == Tile.HERO3) {
+				for(j = 0; j < tableSize; j++) {
+					if(i == j) {
+						d[i][j] = 0;
+					}
+					else {
+						initNeighbour(board, i, i/boardSize, i%boardSize - 1, d, boardSize);
+						initNeighbour(board, i, i/boardSize, i%boardSize + 1, d, boardSize);
+						initNeighbour(board, i, i/boardSize - 1, i%boardSize, d, boardSize);
+						initNeighbour(board, i, i/boardSize + 1, i%boardSize, d, boardSize);
+					}
+				}
+			}
+		}
+		
+		/*// Display Test
+		System.out.println("");
+	    for (i = 0; i < tableSize; i++) {
+	        for (j = 0; j < tableSize; j++) {
+	            System.out.print(d[i][j] + " ");
+	        }
+	        System.out.println();
+	    }
+	    System.out.println();
+	    System.out.println("**********************************************************************************************************************");
+	    System.out.println();*/
+		
+		// Calculating the initial predecessor matrix
+		for (i = 0; i < tableSize; i++) {
+	        for (j = 0; j < tableSize; j++) {
+	            if (d[i][j] != 0 && d[i][j] != Integer.MAX_VALUE) {
+	                p[i][j] = i;
+	            } else {
+	                p[i][j] = -1;
+	            }
+	        }
+	    }
+		
+		// Calculating the distance matrix d
+	    for (k = 0; k < tableSize; k++) {
+	    	currentTile = currentTile = board.getTile(k);
+	    	if(currentTile != Tile.WOODS) {
+		        for (i = 0; i < tableSize; i++) {
+		        	currentTile = currentTile = board.getTile(i);
+		        	if(currentTile != Tile.WOODS) {
+			            for (j = 0; j < tableSize; j++) {
+			                if (d[i][k] == Integer.MAX_VALUE || d[k][j] == Integer.MAX_VALUE || i == j) {
+			                    continue;         
+			                }
+			                
+			                if (d[i][j] > d[i][k] + d[k][j]) {
+			                    d[i][j] = d[i][k] + d[k][j];
+			                    p[i][j] = p[k][j];
+			                }
+			            }
+		        	}
+		        }
+	    	}
+	    }
+	    
+	    // Display Test d
+	    for (i = 0; i < tableSize; i++) {
+	        for (j = 0; j < tableSize; j++) {
+	            System.out.print(d[i][j] + " ");
+	        }
+	        System.out.println();
+	    }
+	    System.out.println();
+	    System.out.println("**********************************************************************************************************************");
+	    System.out.println();
+	    // Display Test p
+	    for (i = 0; i < tableSize; i++) {
+	        for (j = 0; j < tableSize; j++) {
+	            System.out.print(p[i][j] + " ");
+	        }
+	        System.out.println();
+	    }
+	    
+	    res.setDistances(d);
+	    res.setPredecessors(p);
+	    return res;
+	}
+
+	private static void initNeighbour(Board board, int i, int x, int y, int[][] d, int boardSize) {
+		Tile currentTile;
+		if(x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
+			currentTile = board.getTile(x, y);
+			if(currentTile != Tile.WOODS) {
+				d[i][(x * boardSize) + y] = 1;
+			}
+			else {
+				d[i][(x * boardSize) + y] = Integer.MAX_VALUE;
+			}
+		}
 	}
 }

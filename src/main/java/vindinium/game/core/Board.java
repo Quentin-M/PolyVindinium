@@ -77,6 +77,19 @@ public class Board {
 		
 		return data[x][y];
 	}
+
+	/**
+	 * Get the tile corresponding to the coordinate on the board or throw an exception if coordinates are out of bounds
+	 * @param i
+	 * @return the corresponding tile
+	 */
+	public Tile getTile(int i) {
+		if( i < 0 || i >= (size * size)) {
+			throw new IllegalArgumentException("Cannot get Tile for an out of bounds position");
+		}
+		
+		return data[(i/size)][(i%size)];
+	}
 	
 	/**
 	 * Set a tile at defined coordinates
@@ -110,7 +123,7 @@ public class Board {
 			for(int y = 0; y<getSize(); y++) {
 				Tile t = getTile(x, y);
 
-				if(t == Tile.AIR) board += "Â·";
+				if(t == Tile.AIR) board += "·";
 				else if(t == Tile.WOODS) board += "#";
 				else if(Tile.isHero(t)) board += (char)('0'+Tile.getOwner(t));
 				else if(t == Tile.TAVERN) board += "$";
