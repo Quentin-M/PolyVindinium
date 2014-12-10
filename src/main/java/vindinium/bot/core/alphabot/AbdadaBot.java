@@ -63,7 +63,7 @@ public class AbdadaBot extends SecuredBot {
 	    		    public Action call() throws Exception {
 	    		    	Thread.currentThread().setName("AlphaBeta N°" + ii);
 	    		    	
-	    		    	return alphaBeta(game, depth, Integer.MIN_VALUE+1, Integer.MAX_VALUE, 1, false).move;
+	    		    	return alphaBeta(game, game, depth, Integer.MIN_VALUE+1, Integer.MAX_VALUE, 1, false).move;
 	    			}
 	    		}
 	    	);
@@ -168,10 +168,10 @@ public class AbdadaBot extends SecuredBot {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private AlphaBetaResult alphaBeta(Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {		
+	private AlphaBetaResult alphaBeta(Game initialGame, Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {		
 		// Leaf node, compute score
 		if(depth==0 || currentGame.isFinished()) {
-			return new AlphaBetaResult(maximizing*heuristic.evaluate(currentGame), null);
+			return new AlphaBetaResult(maximizing*heuristic.evaluate(initialGame, currentGame), null);
 		}
 		
 		AlphaBetaResult best = new AlphaBetaResult(Integer.MIN_VALUE+1, null);
@@ -240,7 +240,7 @@ public class AbdadaBot extends SecuredBot {
 				
 				boolean exclusive = ((iteration==0) && (i>0));
 				
-				AlphaBetaResult child_result = alphaBeta(M.game, depth - 1, -b, -Math.max(a, best.score), -maximizing, exclusive);
+				AlphaBetaResult child_result = alphaBeta(initialGame, M.game, depth - 1, -b, -Math.max(a, best.score), -maximizing, exclusive);
 				child_result.score = -child_result.score;
 				child_result.move = M.move;
 

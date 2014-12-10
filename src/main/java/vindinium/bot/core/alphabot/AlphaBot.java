@@ -42,7 +42,7 @@ public class AlphaBot extends SecuredBot {
 	 * @return the action we play
 	 */
 	public Action playSafe(final Game game) {
-		return alphaBeta(game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1).move;
+		return alphaBeta(game, game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1).move;
 	}
 
 	@Override
@@ -91,10 +91,10 @@ public class AlphaBot extends SecuredBot {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private AlphaBetaResult alphaBeta(Game currentGame, int depth, int a, int b, int maximizing) {
+	private AlphaBetaResult alphaBeta(Game initialGame, Game currentGame, int depth, int a, int b, int maximizing) {
 		// Leaf node, compute score
 		if(depth==0 || currentGame.isFinished()) {
-			return new AlphaBetaResult(maximizing*heuristic.evaluate(currentGame), null);
+			return new AlphaBetaResult(maximizing*heuristic.evaluate(initialGame, currentGame), null);
 		}
 		
 		AlphaBetaResult best = new AlphaBetaResult(Integer.MIN_VALUE, null);
@@ -103,7 +103,7 @@ public class AlphaBot extends SecuredBot {
 		if(depth==this.depth) logger.trace("Possible move at root : " + children.size());
 		
 		for(int i = 0; i<children.size(); i++) {
-			AlphaBetaResult child_result = alphaBeta(children.get(i).game, depth - 1, -b, -a, -maximizing);
+			AlphaBetaResult child_result = alphaBeta(initialGame, children.get(i).game, depth - 1, -b, -a, -maximizing);
 			child_result.score = - child_result.score;
 			child_result.move = children.get(i).move;
 			

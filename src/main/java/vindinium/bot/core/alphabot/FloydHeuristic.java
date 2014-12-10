@@ -13,7 +13,7 @@ public class FloydHeuristic implements HeuristicInterface {
 	final static Logger logger = LogManager.getLogger();
 	public FloydResult floyd;
 	
-	public int evaluate(Game game) {
+	public int evaluate(Game initialGame, Game game) {
 		if(floyd == null) {
 			logger.info("Initializing the heuristic using Floyd algorithm");
 			floyd = ShortestPath.Floyd(game.getBoard());
