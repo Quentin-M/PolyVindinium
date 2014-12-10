@@ -1,15 +1,13 @@
 package vindinium;
 
-import java.awt.Desktop;
 import java.io.IOException;
-import java.net.URI;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import vindinium.bot.IBot;
+import vindinium.bot.core.IBot;
 import vindinium.client.Client;
-import vindinium.client.core.Config;
+import vindinium.client.Config;
 import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
 import vindinium.game.core.Action;
@@ -51,10 +49,11 @@ public class Vindinium {
 		while(!game.isFinished()) {
 			System.out.println(game);
 			
-			// Get bot's move
+			// Play!
 			Action nextMove;
-			if(!game.getHero().isCrashed()) nextMove = bot.getAction(game);
-			else nextMove = Action.STAY;
+			bot.prePlay(game);
+			nextMove = bot.play(game);
+			bot.postPlay(game);
 			
 			// Send answer to server & game updated game
 			game = client.sendMove(game, nextMove);
@@ -68,25 +67,42 @@ public class Vindinium {
 	}
 	
 	public void logStart(Game game) {
-		logger.info("Start a new game");
+		// Compute average ELO score
+		int avgELO = 0;
+		for(int i = 0; i<4; i++) {
+			if(game.getHero().getId() == i) continue;
+			avgELO += game.getHeroes()[i].getELO();
+		}
+		avgELO = (int) (avgELO / 3d);
+		
+		logger.info("Starting a new game in " + client.getConfig().getGameMode() + " mode. My current ELO is : " + game.getHero().getELO() + " and the average opponents' ELO is " + avgELO+". You can watch my game on : " + game.getViewUrl());
 		
 		// Open in Browser the game
-		if(Desktop.isDesktopSupported()){
+		/*if(Desktop.isDesktopSupported()){
 			try {
 				Desktop.getDesktop().browse(new URI(game.getViewUrl()));
-			} catch(Exception e) {
-				logger.info("To see my game, open "+game.getViewUrl());
-			}
-		} else {
-			logger.info("To see my game, open "+game.getViewUrl());
-		}
+			} catch(Exception e) {}
+		}*/
 	}
 	
 	public void logMove(Action nextMove, Game game) {
-		logger.info("["+(game.getTurn()-1)+" / "+game.getMaxTurns()+"] Decision: " + nextMove.name());
+		logger.debug("["+(game.getTurn()-1)+" / "+game.getMaxTurns()+"] Decision: " + nextMove.name());
 	}
 	
-	public void logEnd(Game response) {
-		logger.info("End a game");
+	public void logEnd(Game game) {
+		// Verify if our bot won the game
+		boolean isWon = true;
+		for(int i = 0; i<4; i++) {
+			if(game.getHeroes()[i].getGold() > game.getHero().getGold()) {
+				isWon = false;
+				break;
+			}
+		}
+		
+		String output = "I just finished a game and I ";
+		if(isWon) output +="won it ! Well done ~";
+		else output += "lost. Better luck next time ~";
+		
+		logger.info(output);
 	}
 }

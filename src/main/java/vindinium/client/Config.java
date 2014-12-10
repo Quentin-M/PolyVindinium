@@ -1,6 +1,5 @@
-package vindinium.client.core;
+package vindinium.client;
 
-import vindinium.client.GameMode;
 import vindinium.exception.InvalidConfigurationException;
 
 /**

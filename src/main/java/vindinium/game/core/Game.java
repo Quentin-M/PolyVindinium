@@ -16,7 +16,6 @@ public class Game {
 	private Board board;
 	private boolean finished;
 	
-	private final String token;
 	private final String viewUrl;
 	private final String playUrl;
 	
@@ -26,7 +25,6 @@ public class Game {
 	public Game(String id, int maxTurns, String token, String viewUrl, String playUrl, int size, int heroIndex) {
 		this.id = id;
 		this.maxTurns = maxTurns;
-		this.token = token;
 		this.viewUrl = viewUrl;
 		this.playUrl = playUrl;
 		this.heroIndex = heroIndex;
@@ -61,7 +59,6 @@ public class Game {
 		board = new Board(game.board);
 		finished = game.finished;
 		
-		token = null;
 		viewUrl = null;
 		playUrl = null;
 	}
@@ -218,9 +215,7 @@ public class Game {
 			
 			if(!heroes[i].isCrashed()) output += String.format("%15s", "[Running]");
 			else output += String.format("%15s", "[Crashed]");
-			
-			if(heroes[i].isCrashed()) output += "[Crashed]";
-			
+						
 			output += "\r\n";
 		}
 		
@@ -249,7 +244,7 @@ public class Game {
 		result = prime * result + heroIndex;
 		result = prime * result + Arrays.hashCode(heroes);
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		
+				
 		return result;
 	}
 

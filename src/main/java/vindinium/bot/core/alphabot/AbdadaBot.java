@@ -7,30 +7,31 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import vindinium.bot.SecuredBot;
-import vindinium.bot.core.alphabot.Simulator;
-import vindinium.bot.core.alphabot.heuristics.AlphaHeuristic;
+import vindinium.bot.core.SecuredBot;
 import vindinium.game.core.Action;
 import vindinium.game.core.Game;
+import vindinium.simulation.Simulator;
 
 public class AbdadaBot extends SecuredBot {
 	final static Logger logger = LogManager.getLogger();
 	public final static int ON_EVALUATION = 66666;
 	
-	private AlphaHeuristic heuristic;
+	private HeuristicInterface heuristic;
 	private int depth;
 	private int threads;
 	
 	ExecutorService executor;
 	private ConcurrentHashMap<Game, AbdadaTTNode> TT;
+	private Future<Action>[] futures;
 	
 	/**
 	 * Create a new AbdadaBot
 	 */
-	public AbdadaBot(AlphaHeuristic heuristic, int depth, int threads) {
+	public AbdadaBot(HeuristicInterface heuristic, int depth, int threads) {
 		this.heuristic = heuristic;
 		this.depth = depth;
 		this.threads = threads;
@@ -45,9 +46,72 @@ public class AbdadaBot extends SecuredBot {
 		return "AbdadaBot";
 	}
 	
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
+	@Override
+	/**
+	 * Get bot's next move using Abdada algorithm
+	 * @param game
+	 * @return the action we play
+	 */
+	public Action playSafe(final Game game) {
+		TT = new ConcurrentHashMap<Game, AbdadaTTNode>();
+
+		futures = new Future[threads];
+		for(int i = 0; i<threads; i++) {
+			final int ii = i;
+        	futures[i] = executor.submit(
+	    		new Callable<Action>() {
+	    		    public Action call() throws Exception {
+	    		    	Thread.currentThread().setName("AlphaBeta N°" + ii);
+	    		    	
+	    		    	return alphaBeta(game, depth, Integer.MIN_VALUE+1, Integer.MAX_VALUE, 1, false).move;
+	    			}
+	    		}
+	    	);
+        }
+		
+        // Wait until first is done
+        Action action = null;
+        boolean isDone = false;
+        while(!isDone) {
+        	for(int i = 0; i<threads; i++) {
+        		if(futures[i].isDone()) {
+        			isDone = true;
+        			try {
+						action = futures[i].get();
+					} catch (Exception e) {}
+        			break;
+        		}
+        	}		
+        }
+        
+        // Cancel all tasks
+        for(int i = 0; i<threads; i++) {
+        	futures[i].cancel(true);
+        }
+        
+		return action;
+	}
+
+	@Override
+	/**
+	 * Get bot's next move when Abdada algorithm timed-out
+	 * @param game
+	 * @return the action we play
+	 */
+	public Action playQuickly(Game game) {
+		logger.warn(getName()+" played randomly !");
+		
+		// Cancel all tasks
+        for(int i = 0; i<threads; i++) {
+        	futures[i].cancel(true);
+        }
+        
+		return Action.values()[new Random().nextInt(Action.values().length)];
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * Define the return type of alpha-beta algorithm
@@ -98,80 +162,11 @@ public class AbdadaBot extends SecuredBot {
 			this.depth = d;
 			nproc = 1;
 		}
-		
-		public AbdadaTTNode(AbdadaTTNode obj) {
-			flag = obj.flag;
-			value = obj.value;
-			depth = obj.depth;
-			nproc = obj.nproc;
-		}
 	}
 	
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
-
-	@Override
-	/**
-	 * Get bot's next move using Alpha-Beta algorithm
-	 * @param game
-	 * @return
-	 */
-	public Action getSecuredAction(final Game game) {	
-		TT = new ConcurrentHashMap<Game, AbdadaTTNode>();
-
-		Future<Action>[] futures = new Future[threads];
-		for(int i = 0; i<threads; i++) {
-			final int ii = i;
-        	futures[i] = executor.submit(
-	    		new Callable<Action>() {
-	    		    public Action call() throws Exception {
-	    		    	Thread.currentThread().setName("AlphaBeta N°" + ii);
-	    		    	
-	    		    	return alphaBeta(game, depth, Integer.MIN_VALUE+1, Integer.MAX_VALUE, 1, false).move;
-	    			}
-	    		}
-	    	);
-        }
-		
-        // Wait until first is done
-        Action action = null;
-        boolean isDone = false;
-        while(!isDone) {
-        	for(int i = 0; i<threads; i++) {
-        		if(futures[i].isDone()) {
-        			isDone = true;
-        			try {
-						action = futures[i].get();
-					} catch (Exception e) {}
-        			break;
-        		}
-        	}		
-        }
-        
-        // Cancel all tasks
-        for(int i = 0; i<threads; i++) {
-        	futures[i].cancel(true);
-        }
-        
-		return action;
-	}
-	
-	@Override
-	/**
-	 * Get bot's next move when Alpha-Beta algorithm timed-out
-	 * @param game
-	 * @return
-	 */
-	public Action getTimeoutAction(final Game game) {
-		logger.info("AlphaBeta played randomly !");
-		
-		return Action.values()[new Random().nextInt(Action.values().length)];
-	}
-	
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private AlphaBetaResult alphaBeta(Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {		
 		// Leaf node, compute score
@@ -305,9 +300,9 @@ public class AbdadaBot extends SecuredBot {
 				for(Action action2 : Action.values()) {
 					for(Action action3 : Action.values()) {
 						Game child = currentGame;
-						child = Simulator.simulate(child, action1, currentGame.getHeroes()[currentGame.getHero().getId()+1]);
-						if(child!=null) child = Simulator.simulate(child, action2, currentGame.getHeroes()[currentGame.getHero().getId()+2]);
-						if(child!=null) child = Simulator.simulate(child, action3, currentGame.getHeroes()[currentGame.getHero().getId()+3]);
+						child = Simulator.simulate(child, action1, currentGame.getHeroes()[(currentGame.getHero().getId()+1)%4]);
+						if(child!=null) child = Simulator.simulate(child, action2, currentGame.getHeroes()[(currentGame.getHero().getId()+2)%4]);
+						if(child!=null) child = Simulator.simulate(child, action3, currentGame.getHeroes()[(currentGame.getHero().getId()+3)%4]);
 						
 						if(child!=null) children.add(new AlphaBetaChild(null, child));
 					}

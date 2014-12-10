@@ -17,8 +17,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import vindinium.client.api.ResponseParser;
-import vindinium.client.core.Config;
 import vindinium.exception.CrashedException;
 import vindinium.exception.GameStateException;
 import vindinium.game.core.Action;
@@ -186,5 +184,23 @@ public class Client {
 		startGameRequest.setEntity(new UrlEncodedFormEntity(postParams));
 		
 		return startGameRequest;
+	}
+
+	/**
+	 * Get the configuration of the game client
+	 * 
+	 * @return the config
+	 */
+	public Config getConfig() {
+		return config;
+	}
+
+	/**
+	 * Get the status of the game (already started or not)
+	 * 
+	 * @return the gameStarted
+	 */
+	public boolean isGameStarted() {
+		return gameStarted;
 	}
 }

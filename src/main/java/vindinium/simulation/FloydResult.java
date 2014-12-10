@@ -1,4 +1,4 @@
-package vindinium.bot.core;
+package vindinium.simulation;
 
 import java.util.ArrayList;
 import java.util.Collections;

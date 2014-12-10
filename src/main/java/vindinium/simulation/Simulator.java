@@ -1,4 +1,4 @@
-package vindinium.bot.core.alphabot;
+package vindinium.simulation;
 
 import vindinium.game.core.Action;
 import vindinium.game.core.Game;
@@ -6,7 +6,6 @@ import vindinium.game.core.Hero;
 import vindinium.game.core.Position;
 import vindinium.game.core.Tile;
 
-//TODO If crashed, only one possible move! STAY
 /**
  * A toolbox to simulate a move on a game state
  */
@@ -21,6 +20,7 @@ public class Simulator {
 	 */
 	public static Game simulate(final Game game, Action action, final Hero currentPlayer) {
 		if(game.isFinished()) return null;
+		if(currentPlayer.isCrashed() && action != Action.STAY) return null;
 		
 		Game newGame = new Game(game);
 		int heroIndex = currentPlayer.getId();

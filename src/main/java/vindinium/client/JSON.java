@@ -1,4 +1,4 @@
-package vindinium.client.api;
+package vindinium.client;
 
 import java.util.HashMap;
 import java.util.Map;

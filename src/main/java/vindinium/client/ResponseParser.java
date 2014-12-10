@@ -1,4 +1,4 @@
-package vindinium.client.api;
+package vindinium.client;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

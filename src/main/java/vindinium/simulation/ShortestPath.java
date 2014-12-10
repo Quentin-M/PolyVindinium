@@ -1,4 +1,4 @@
-package vindinium.bot.core;
+package vindinium.simulation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import vindinium.game.core.Board;
-import vindinium.game.core.Game;
 import vindinium.game.core.NoPathException;
 import vindinium.game.core.Position;
 import vindinium.game.core.Tile;
@@ -106,7 +105,7 @@ public class ShortestPath {
 	}
 
 	public static FloydResult Floyd(Board board){
-		int i, j, k, x, y, d[][], p[][], tableSize = board.getSize() * board.getSize(), boardSize = board.getSize();
+		int i, j, k, d[][], p[][], tableSize = board.getSize() * board.getSize(), boardSize = board.getSize();
 		d = new int [tableSize][tableSize];
 		p = new int [tableSize][tableSize];
 		Tile currentTile;
@@ -122,7 +121,6 @@ public class ShortestPath {
 		
 		for(i = 0; i < tableSize; i++) {
 			currentTile = board.getTile(i);
-			System.out.print(currentTile);
 			if(currentTile == Tile.AIR || currentTile == Tile.HERO0 || currentTile == Tile.HERO1 || currentTile == Tile.HERO2 || currentTile == Tile.HERO3) {
 				for(j = 0; j < tableSize; j++) {
 					if(i == j) {
@@ -138,18 +136,6 @@ public class ShortestPath {
 			}
 		}
 		
-		/*// Display Test
-		System.out.println("");
-	    for (i = 0; i < tableSize; i++) {
-	        for (j = 0; j < tableSize; j++) {
-	            System.out.print(d[i][j] + " ");
-	        }
-	        System.out.println();
-	    }
-	    System.out.println();
-	    System.out.println("**********************************************************************************************************************");
-	    System.out.println();*/
-		
 		// Calculating the initial predecessor matrix
 		for (i = 0; i < tableSize; i++) {
 	        for (j = 0; j < tableSize; j++) {
@@ -163,10 +149,10 @@ public class ShortestPath {
 		
 		// Calculating the distance matrix d
 	    for (k = 0; k < tableSize; k++) {
-	    	currentTile = currentTile = board.getTile(k);
+	    	currentTile = board.getTile(k);
 	    	if(currentTile != Tile.WOODS) {
 		        for (i = 0; i < tableSize; i++) {
-		        	currentTile = currentTile = board.getTile(i);
+		        	currentTile = board.getTile(i);
 		        	if(currentTile != Tile.WOODS) {
 			            for (j = 0; j < tableSize; j++) {
 			                if (d[i][k] == Integer.MAX_VALUE || d[k][j] == Integer.MAX_VALUE || i == j) {
@@ -183,26 +169,9 @@ public class ShortestPath {
 	    	}
 	    }
 	    
-	    // Display Test d
-	    for (i = 0; i < tableSize; i++) {
-	        for (j = 0; j < tableSize; j++) {
-	            System.out.print(d[i][j] + " ");
-	        }
-	        System.out.println();
-	    }
-	    System.out.println();
-	    System.out.println("**********************************************************************************************************************");
-	    System.out.println();
-	    // Display Test p
-	    for (i = 0; i < tableSize; i++) {
-	        for (j = 0; j < tableSize; j++) {
-	            System.out.print(p[i][j] + " ");
-	        }
-	        System.out.println();
-	    }
-	    
 	    res.setDistances(d);
 	    res.setPredecessors(p);
+	    
 	    return res;
 	}
 

@@ -2,7 +2,7 @@ package vindinium.game.core;
 
 import java.util.ArrayList;
 
-import vindinium.bot.core.ShortestPath;
+import vindinium.simulation.ShortestPath;
 
 /**
  * A Java POJO for a Vindinium Hero

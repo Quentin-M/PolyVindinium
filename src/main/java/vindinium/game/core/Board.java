@@ -1,7 +1,6 @@
 package vindinium.game.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A simple implementation of a Vindinium board to help
@@ -123,7 +122,7 @@ public class Board {
 			for(int y = 0; y<getSize(); y++) {
 				Tile t = getTile(x, y);
 
-				if(t == Tile.AIR) board += "·";
+				if(t == Tile.AIR) board += "Â·";
 				else if(t == Tile.WOODS) board += "#";
 				else if(Tile.isHero(t)) board += (char)('0'+Tile.getOwner(t));
 				else if(t == Tile.TAVERN) board += "$";

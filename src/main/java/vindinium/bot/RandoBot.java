@@ -1,8 +1,8 @@
-package vindinium.bot.core;
+package vindinium.bot;
 
 import java.util.Random;
 
-import vindinium.bot.IBot;
+import vindinium.bot.core.IBot;
 import vindinium.game.core.Action;
 import vindinium.game.core.Game;
 
@@ -29,7 +29,10 @@ public class RandoBot implements IBot {
 	/**
 	 * Get RandoBot's next move, randomly!
 	 */
-	public Action getAction(Game Game) {
+	public Action play(Game Game) {
 		return mActions[mRandom.nextInt(mActions.length)];
 	}
+
+	public void prePlay(Game game) {}
+	public void postPlay(Game game) {}
 }
