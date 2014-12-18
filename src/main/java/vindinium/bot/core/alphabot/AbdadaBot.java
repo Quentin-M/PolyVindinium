@@ -159,8 +159,15 @@ public class AbdadaBot extends SecuredBot {
 		public AbdadaTTNode(int d) {
 			flag = UNSET;
 			value = null;
-			this.depth = d;
+			depth = d;
 			nproc = 1;
+		}
+
+		public AbdadaTTNode(AbdadaTTNode ttEntry) {
+			flag = ttEntry.flag;
+			value = ttEntry.value;
+			depth = ttEntry.depth;
+			nproc = ttEntry.nproc;
 		}
 	}
 	
@@ -168,7 +175,7 @@ public class AbdadaBot extends SecuredBot {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private AlphaBetaResult alphaBeta(Game initialGame, Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {		
+	private AlphaBetaResult alphaBeta(Game initialGame, Game currentGame, int depth, int a, int b, int maximizing, boolean exclusiveP) {				
 		// Leaf node, compute score
 		if(depth==0 || currentGame.isFinished()) {
 			return new AlphaBetaResult(maximizing*heuristic.evaluate(initialGame, currentGame), null);
@@ -177,48 +184,56 @@ public class AbdadaBot extends SecuredBot {
 		AlphaBetaResult best = new AlphaBetaResult(Integer.MIN_VALUE+1, null);
 		
 		// TT Lookup
-		AbdadaTTNode ttEntry;
-		synchronized(TT) {
-			ttEntry = TT.get(currentGame);
-			boolean ttEntryIsNew = false;
+		AbdadaTTNode ttEntry = TT.get(currentGame);
+		boolean ttEntryIsNew = false;
+		
+		if(ttEntry==null) {
+			// Doesn't exist yet, create it and add it with nproc=1, flag=UNSET, value=null, depth=depth
+			ttEntry = new AbdadaTTNode(depth);
+			TT.put(currentGame, ttEntry);
 			
-			if(ttEntry==null) {
-				// Doesn't exist yet, create it and add it with nproc=1, flag=UNSET, value=null, depth=depth
-				ttEntry = new AbdadaTTNode(depth);
-				TT.put(currentGame, ttEntry);
-				
-				ttEntryIsNew = true;
-			}
-			
-			// - Exclusivity case
-			if(ttEntry.depth == depth && exclusiveP && ttEntry.nproc > 0) {
-				best.score = ON_EVALUATION;
-			}
-			// - Else
-			else if(!ttEntryIsNew && ttEntry.depth >= depth) {				
-				if(ttEntry.flag == AbdadaTTNode.EXACT) {
-					best = ttEntry.value;
-					a = ttEntry.value.score;
-					b = ttEntry.value.score;
-				}
-				else if(ttEntry.flag == AbdadaTTNode.LOWERBOUND && ttEntry.value.score > a) {				
-					best = ttEntry.value;
-					a = ttEntry.value.score;
-				}
-				else if(ttEntry.flag == AbdadaTTNode.UPPERBOUND && ttEntry.value.score < b) {
-					best = ttEntry.value;
-					b = ttEntry.value.score;
-				}
-				
-				// A new worker on this node
-				if(ttEntry.depth == depth && a < b) {
-					ttEntry.nproc++;
-				}
-			}
+			ttEntryIsNew = true;
 		}
 		
-		// Alpha-beta cutoff or exclusivity case
-		if(a>=b || best.score == ON_EVALUATION) return new AlphaBetaResult(best);
+		// - Exclusivity case
+		if(ttEntry.depth == depth && exclusiveP && ttEntry.nproc > 0) {
+			best.score = ON_EVALUATION;
+			return best;
+		}
+		// - Else if not new and depth >= depth
+		else if(!ttEntryIsNew && ttEntry.depth >= depth) {		
+			if(ttEntry.flag == AbdadaTTNode.EXACT) {
+				best = ttEntry.value;
+				a = ttEntry.value.score;
+				b = ttEntry.value.score;
+				//System.out.print("E");
+			}
+			else if(ttEntry.flag == AbdadaTTNode.UPPERBOUND && ttEntry.value.score < b) {
+				best = ttEntry.value;
+				b = ttEntry.value.score;
+				//System.out.print("U");
+			}
+			else if(ttEntry.flag == AbdadaTTNode.LOWERBOUND && ttEntry.value.score > a) {				
+				best = ttEntry.value;
+				a = ttEntry.value.score;
+				//System.out.print("L");
+			}
+			
+			// A new worker on this node
+			if(ttEntry.depth == depth && a < b) {
+				ttEntry = new AbdadaTTNode(ttEntry);
+				ttEntry.nproc++;
+				TT.put(currentGame, ttEntry);
+			}
+			
+			// Alpha-beta cutoff or exclusivity case
+			if(a>=b) return new AlphaBetaResult(best);
+		}
+		else if(ttEntry.depth < depth) {
+			ttEntry.flag = AbdadaTTNode.UNSET;
+			ttEntry.depth = depth;
+			ttEntry.nproc = 1;
+		}
 		
 		// Generate list of children
 		ArrayList<AlphaBetaChild> children = generateNextGames(currentGame, maximizing);
@@ -228,9 +243,11 @@ public class AbdadaBot extends SecuredBot {
 		for (int iteration = 0; iteration < 2 && a < b && !allDone; iteration++) {
 			allDone = true;
 
+			//if(depth==this.depth) logger.debug("Possible move at root : " + children.size());
+
 			int i = 0;
 			AlphaBetaChild M = children.get(i);
-			while(M != null && a < b) {
+			while(M != null) {
 				// Skip first son on 2nd iteration
 				if(iteration==1 && i==0) {
 					i++;
@@ -240,16 +257,22 @@ public class AbdadaBot extends SecuredBot {
 				
 				boolean exclusive = ((iteration==0) && (i>0));
 				
-				AlphaBetaResult child_result = alphaBeta(initialGame, M.game, depth - 1, -b, -Math.max(a, best.score), -maximizing, exclusive);
+				AlphaBetaResult child_result = alphaBeta(initialGame, M.game, depth - 1, -b, -a, -maximizing, exclusive);
 				child_result.score = -child_result.score;
 				child_result.move = M.move;
 
+				//if(depth==this.depth && iteration == 1) logger.info("Score for " + children.get(i).move + " = " + child_result.score);
+
 				if(child_result.score == -ON_EVALUATION) {
 					allDone = false;
-				} else if(child_result.score > best.score) {
-					best = child_result;
+				} else {
+					if(best.score < child_result.score) {
+						best = child_result;
+					}
 					
-					if(best.score >= b) break;
+					a = Math.max(child_result.score, a);
+					
+					if(a >= b) break;
 				}
 				
 				i++;
@@ -258,23 +281,24 @@ public class AbdadaBot extends SecuredBot {
 			}
 		}
 		
+		//if(depth==this.depth) logger.info("Decision:" + best.score + " " + best.move);
+		
 		// Transposition Table Store; node is the lookup key for ttEntry
-		synchronized(TT) {
-			ttEntry = TT.get(currentGame);
+		ttEntry = TT.get(currentGame);
+		if(ttEntry.depth <= depth) {
+			ttEntry = new AbdadaTTNode(ttEntry);
+			
+			if(ttEntry.depth == depth) ttEntry.nproc--;
+			else ttEntry.nproc = 0;
 
-			if(ttEntry.depth <= depth) {			
-				if(ttEntry.depth == depth) ttEntry.nproc--;
-				else ttEntry.nproc = 0;
-				
-				if(best.score >= b) ttEntry.flag = AbdadaTTNode.LOWERBOUND;
-				else if(best.score < a) ttEntry.flag = AbdadaTTNode.UPPERBOUND;
-				else ttEntry.flag = AbdadaTTNode.EXACT;
-				
-				ttEntry.value = best;
-				ttEntry.depth = depth;
-				
-				TT.put(currentGame, ttEntry);
-			}
+			if(best.score <= a) ttEntry.flag = AbdadaTTNode.UPPERBOUND;
+			else if(best.score >= b) ttEntry.flag = AbdadaTTNode.LOWERBOUND;
+			else ttEntry.flag = AbdadaTTNode.EXACT;
+			
+			ttEntry.value = new AlphaBetaResult(best);
+			ttEntry.depth = depth;
+			
+			TT.put(currentGame, ttEntry);
 		}
 
 		return best;
